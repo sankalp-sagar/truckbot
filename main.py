@@ -2,7 +2,8 @@ from ultralytics import YOLO
 import cv2
 import cv2
 import numpy as np
-import mss
+import pytesseract
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 import pyautogui
 import time
 
@@ -51,6 +52,24 @@ def crop_loot_panel(frame):
     panel = frame[y1:y2, x1:x2]
     return panel
 
+def crop_state_region(panel):
+    h, w, _ = panel.shape
+    x1 = int(w * 0.23)
+    x2 = int(w * 0.8)
+    y1 = int(h * 0.02)
+    y2 = int(h * 0.25)
+    state_region = panel[y1:y2, x1:x2] 
+    text = pytesseract.image_to_string(state_region)
+    text = text.split()
+    timestamp = time.time()
+    try:
+        text = int(text[0][1:])
+    except (IndexError, ValueError, TypeError):
+        cv2.imwrite(f"badstatedetection/state_region_{text}_{timestamp}.png", state_region)
+        cv2.imwrite(f"badstatedetection/state_region_{text}_{timestamp}_info_box.png", panel)
+        text = 0
+    return text
+
 # time.sleep(5)
 # frame = capture_screen()
 # refresh_coords = find_refresh_icon(frame)
@@ -60,5 +79,8 @@ def crop_loot_panel(frame):
 #     pyautogui.click(truck[0], truck[1])
 
 frame = crop_loot_panel("screenbox.png")
-cv2.imshow("frame", frame)
-cv2.waitKey(0)
+state = crop_state_region(frame)
+print(state)
+
+# cv2.imshow("frane", state)
+# cv2.waitKey(0)
