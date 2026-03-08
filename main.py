@@ -40,6 +40,17 @@ def find_refresh_icon(frame, template_path="templates/refresh.png", threshold=0.
         return (center_x, center_y)
     return None
 
+def crop_loot_panel(frame):
+    frame = cv2.imread(frame)
+    h, w, _ = frame.shape
+    x1 = int(w * 0.39)
+    x2 = int(w * 0.61)
+
+    y1 = int(h * 0.64)
+    y2 = int(h * 0.86)
+    panel = frame[y1:y2, x1:x2]
+    return panel
+
 # time.sleep(5)
 # frame = capture_screen()
 # refresh_coords = find_refresh_icon(frame)
@@ -47,3 +58,7 @@ def find_refresh_icon(frame, template_path="templates/refresh.png", threshold=0.
 
 # for truck in trucks:
 #     pyautogui.click(truck[0], truck[1])
+
+frame = crop_loot_panel("screenbox.png")
+cv2.imshow("frame", frame)
+cv2.waitKey(0)
