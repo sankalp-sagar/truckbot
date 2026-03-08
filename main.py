@@ -29,18 +29,12 @@ def capture_window(hwnd):
     width = right - left
     height = bottom - top
     hwndDC = win32gui.GetWindowDC(hwnd)
-    mfcDC = win32ui.CreateDCFromHandle(hwndDC)
+    mfcDC  = win32ui.CreateDCFromHandle(hwndDC)
     saveDC = mfcDC.CreateCompatibleDC()
     bitmap = win32ui.CreateBitmap()
     bitmap.CreateCompatibleBitmap(mfcDC, width, height)
     saveDC.SelectObject(bitmap)
-    saveDC.BitBlt(
-        (0,0),
-        (width,height),
-        mfcDC,
-        (0,0),
-        win32con.SRCCOPY
-    )
+    result = win32gui.PrintWindow(hwnd, saveDC.GetSafeHdc(), 1)
     bmpinfo = bitmap.GetInfo()
     bmpstr = bitmap.GetBitmapBits(True)
     img = np.frombuffer(bmpstr, dtype='uint8')
@@ -50,6 +44,8 @@ def capture_window(hwnd):
     saveDC.DeleteDC()
     mfcDC.DeleteDC()
     win32gui.ReleaseDC(hwnd, hwndDC)
+    if result != 1:
+        return None
     return img
 
 def detect_trucks(image_path):
@@ -65,3 +61,17 @@ def detect_trucks(image_path):
             centers.append((cx, cy))
     return centers
 
+hwnd = find_window("LastZ")
+
+if hwnd is None:
+    print("LastZ window not found")
+    exit()
+
+frame = capture_window(hwnd)
+
+if frame is None:
+    print("Capture failed")
+    exit()
+
+cv2.imshow("capture", frame)
+cv2.waitKey(0)
