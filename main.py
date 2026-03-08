@@ -2,51 +2,21 @@ from ultralytics import YOLO
 import cv2
 import cv2
 import numpy as np
+import mss
 import pyautogui
 import time
-import win32gui
-import win32ui
-import win32con
+import dxcam
 
+camera = dxcam.create()
 model = YOLO("runs/detect/train/weights/best.pt")
 classes = model.names
 
-def find_window(title):
-    hwnd = win32gui.FindWindow(None, title)
-    if hwnd == 0:
-        return None
-    return hwnd
+sct = mss.mss()
+monitor = sct.monitors[1]
 
-def list_windows():
-    def callback(hwnd, windows):
-        title = win32gui.GetWindowText(hwnd)
-        if title:
-            print(hwnd, ":", title)
-    win32gui.EnumWindows(callback, None)
-
-def capture_window(hwnd):
-    left, top, right, bottom = win32gui.GetWindowRect(hwnd)
-    width = right - left
-    height = bottom - top
-    hwndDC = win32gui.GetWindowDC(hwnd)
-    mfcDC  = win32ui.CreateDCFromHandle(hwndDC)
-    saveDC = mfcDC.CreateCompatibleDC()
-    bitmap = win32ui.CreateBitmap()
-    bitmap.CreateCompatibleBitmap(mfcDC, width, height)
-    saveDC.SelectObject(bitmap)
-    result = win32gui.PrintWindow(hwnd, saveDC.GetSafeHdc(), 1)
-    bmpinfo = bitmap.GetInfo()
-    bmpstr = bitmap.GetBitmapBits(True)
-    img = np.frombuffer(bmpstr, dtype='uint8')
-    img.shape = (bmpinfo['bmHeight'], bmpinfo['bmWidth'], 4)
-    img = cv2.cvtColor(img, cv2.COLOR_BGRA2BGR)
-    win32gui.DeleteObject(bitmap.GetHandle())
-    saveDC.DeleteDC()
-    mfcDC.DeleteDC()
-    win32gui.ReleaseDC(hwnd, hwndDC)
-    if result != 1:
-        return None
-    return img
+def capture_screen_dxcam():
+    frame = camera.grab()
+    return frame
 
 def detect_trucks(image_path):
     img = cv2.imread(image_path)
@@ -61,17 +31,7 @@ def detect_trucks(image_path):
             centers.append((cx, cy))
     return centers
 
-hwnd = find_window("LastZ")
-
-if hwnd is None:
-    print("LastZ window not found")
-    exit()
-
-frame = capture_window(hwnd)
-
-if frame is None:
-    print("Capture failed")
-    exit()
-
-cv2.imshow("capture", frame)
+time.sleep(5)
+frame = capture_screen_dxcam()
+cv2.imshow("screen", frame)
 cv2.waitKey(0)

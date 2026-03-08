@@ -6,5 +6,6 @@
 
 
 # INSTRUCTIONS
-# Do not resize your game window after running it
-# Keep your trucks page open before running this and make sure to tick Hide trucks from this state
+# Make your game maximized and do not resize your game window after running it
+# Keep your trucks page open before running this
+# After it starts, you have 10 seconds to make the gam
