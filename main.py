@@ -1,14 +1,18 @@
+import os
+os.environ["FLAGS_use_mkldnn"] = "0"
+os.environ["PADDLE_PDX_DISABLE_MODEL_SOURCE_CHECK"] = "True"
 from ultralytics import YOLO
-import cv2
+from paddleocr import PaddleOCR
 import cv2
 import numpy as np
-import pytesseract
-pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+import re
 import pyautogui
 import time
-
+import os
+from pathlib import Path
 model = YOLO("runs/detect/train/weights/best.pt")
 classes = model.names
+ocr = PaddleOCR(lang="en")
 
 def capture_screen():
     screenshot = pyautogui.screenshot()
@@ -27,6 +31,30 @@ def detect_trucks(img):
             cy = int((y1 + y2) / 2)
             centers.append((cx, cy))
     return centers
+
+def parse_player_info(ocr_result):
+    state = None
+    level = None
+    alliance = None
+    power = None
+
+    for block in ocr_result:
+        for line in block:
+            text = line[1][0]
+            m = re.search(r"#(\d+)", text)
+            if m and state is None:
+                state = int(m.group(1))
+            m = re.search(r"Lv\.?\s*(\d+)", text, re.IGNORECASE)
+            if m and level is None:
+                level = int(m.group(1))
+            m = re.search(r"\[([A-Za-z0-9]+)\]", text)
+            if m and alliance is None:
+                alliance = m.group(1)
+            m = re.search(r"(\d{1,3}(?:,\d{3})+)", text)
+            if m and power is None:
+                power = int(m.group(1).replace(",", ""))
+
+    return state, level, alliance, power
 
 def find_refresh_icon(frame, template_path="templates/refresh.png", threshold=0.8):
     template = cv2.imread(template_path)
@@ -50,6 +78,7 @@ def crop_loot_panel(frame):
     y1 = int(h * 0.64)
     y2 = int(h * 0.86)
     panel = frame[y1:y2, x1:x2]
+    cv2.imwrite("panel.png", panel)
     return panel
 
 def crop_state_region(panel):
@@ -59,16 +88,10 @@ def crop_state_region(panel):
     y1 = int(h * 0.02)
     y2 = int(h * 0.25)
     state_region = panel[y1:y2, x1:x2] 
-    text = pytesseract.image_to_string(state_region)
-    text = text.split()
-    timestamp = time.time()
-    try:
-        text = int(text[0][1:])
-    except (IndexError, ValueError, TypeError):
-        cv2.imwrite(f"badstatedetection/state_region_{text}_{timestamp}.png", state_region)
-        cv2.imwrite(f"badstatedetection/state_region_{text}_{timestamp}_info_box.png", panel)
-        text = 0
-    return text
+    cv2.imwrite("stateregion.png", state_region)
+    result = ocr.ocr(state_region)
+    state, level, alliance, power = parse_player_info(result)
+    return state, level, alliance, power
 
 # time.sleep(5)
 # frame = capture_screen()
@@ -78,9 +101,19 @@ def crop_state_region(panel):
 # for truck in trucks:
 #     pyautogui.click(truck[0], truck[1])
 
-frame = crop_loot_panel("screenbox.png")
-state = crop_state_region(frame)
-print(state)
+# tests_folder = "tests"
+# for test_file in Path(tests_folder).glob("*"):
+#     if test_file.is_file():
+#         frame = crop_loot_panel(str(test_file))
+#         state, level, alliance, power = crop_state_region(frame)
+#         print(f"\n{test_file.name} - State: {state}, Level: {level}, Alliance: {alliance}, Power: {power}")
+
+# frame = crop_loot_panel("screenbox.png")
+# state, level, alliance, power = crop_state_region(frame)
+# print("State: ", state)
+# print("Level: ", level)
+# print("Alliance: ", alliance)
+# print("Power: ", power)
 
 # cv2.imshow("frane", state)
 # cv2.waitKey(0)
