@@ -81,6 +81,28 @@ def crop_loot_panel(frame):
     cv2.imwrite("panel.png", panel)
     return panel
 
+def count_fragments(info_box_path="panel.png", template_path="templates/fragment.png", threshold=0.8):
+    img = cv2.imread(info_box_path, cv2.IMREAD_COLOR)
+    template = cv2.imread(template_path, cv2.IMREAD_COLOR)
+    h, w = template.shape[:2]
+
+    res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED)
+    loc = np.where(res >= threshold)
+
+    detections = []
+    for pt in zip(*loc[::-1]): 
+        detections.append(pt)
+
+    detections.sort(key=lambda p: p[0]) 
+    count = 0
+    last_x = -9999
+    for (x, y) in detections:
+        if x - last_x > w * 0.8:  
+            count += 1
+            last_x = x
+
+    return count
+
 def crop_state_region(panel):
     h, w, _ = panel.shape
     x1 = int(w * 0.23)
@@ -117,3 +139,10 @@ def crop_state_region(panel):
 
 # cv2.imshow("frane", state)
 # cv2.waitKey(0)
+
+tests_filder = "tests"
+for test_file in Path(tests_filder).glob("*"):
+    if test_file.is_file():
+        frame = crop_loot_panel(str(test_file))
+        fragments = count_fragments(info_box_path="panel.png", template_path="templates/fragment.png")
+        print("Fragment is: ", fragments)
