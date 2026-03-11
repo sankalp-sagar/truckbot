@@ -10,9 +10,13 @@ import pyautogui
 import time
 import os
 from pathlib import Path
+import configparser
 model = YOLO("runs/detect/train/weights/best.pt")
 classes = model.names
 ocr = PaddleOCR(lang="en")
+
+config = configparser.ConfigParser()
+config.read("config.ini")
 
 def capture_screen():
     screenshot = pyautogui.screenshot()
@@ -103,6 +107,13 @@ def detect_template(img, template_path, threshold=0.8):
 
     return count
 
+def scroll(x1, y1, x2, y2, duration=0.2):
+    pyautogui.moveTo(x1, y1)
+    time.sleep(0.05)
+    pyautogui.mouseDown()
+    pyautogui.moveTo(x2, y2, duration=duration)
+    pyautogui.mouseUp()
+
 def count_fragments(
         info_box_path="panel.png",
         fragment_template="templates/fragment.png",
@@ -131,6 +142,13 @@ def crop_state_region(panel):
     state, level, alliance, power = parse_player_info(result)
     return state, level, alliance, power
 
+x1 = int(config["screen_values"]["x1"])
+y1 = int(config["screen_values"]["y1"])
+x2 = int(config["screen_values"]["x2"])
+y2 = int(config["screen_values"]["y2"])
+
+
+
 # time.sleep(5)
 # frame = capture_screen()
 # refresh_coords = find_refresh_icon(frame)
@@ -156,9 +174,9 @@ def crop_state_region(panel):
 # cv2.imshow("frane", state)
 # cv2.waitKey(0)
 
-tests_filder = "tests"
-for test_file in Path(tests_filder).glob("*"):
-    if test_file.is_file():
-        frame = crop_loot_panel(str(test_file))
-        fragments = count_fragments()
-        print("Fragment is: ", fragments)
+# tests_filder = "tests"
+# for test_file in Path(tests_filder).glob("*"):
+#     if test_file.is_file():
+#         frame = crop_loot_panel(str(test_file))
+#         fragments = count_fragments()
+#         print("Fragment is: ", fragments)
