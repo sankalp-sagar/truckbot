@@ -61,7 +61,6 @@ def parse_player_info(ocr_result):
     return state, level, alliance, power
 
 def crop_loot_panel(frame, x1,y1,x2,y2):
-    frame = cv2.imread(frame, cv2.IMREAD_COLOR)
     panel = frame[y1:y2, x1:x2]
     cv2.imwrite("panel.png", panel)
     return panel
@@ -137,6 +136,9 @@ scrolly1 = int(config["screen_values"]["scrolly1"])
 scrollx2 = int(config["screen_values"]["scrollx2"])
 scrollx2 = int(config["screen_values"]["scrolly2"])
 
+refreshx = int(config["screen_values"]["refreshx"])
+refreshy = int(config["screen_values"]["refreshy"])
+
 world_chat_x = int(config["screen_values"]["firstchatx"])
 world_chat_y = int(config["screen_values"]["firstchaty"])
 
@@ -155,10 +157,25 @@ sixthchaty = int(config["screen_values"]["sixthchaty"])
 # state, level, alliance, power = crop_state_region("screenbox.png", stateboxx1, stateboxy1, stateboxx2, stateboxy2)
 # print(f"\nState: {state}, Level: {level}, Alliance: {alliance}, Power: {power}")
 
-# if __name__ == "__main__":
-#     time.sleep(5)
-#     state_filter = 0
-#     state_filter = int(input("Enter the state ID to filter (0 for no filter): "))
+if __name__ == "__main__":
+    time.sleep(5)
+    state_filter = 0
+    #state_filter = int(input("Enter the state ID to filter (0 for no filter): "))
+    while True:
+        screen = capture_screen()
+        trucks = detect_trucks(screen)
+        for truck in trucks:
+            pyautogui.click(truck[0], truck[1]) # Click on truck
+            time.sleep(0.5)
+            points = 0
+            screen = capture_screen()
+            info_box = crop_loot_panel(screen, truckinfotopx1, truckinfotopy1, truckinfobottomx2, truckinfobottomy2)
+            state, level, alliance, power = crop_state_region(screen, stateboxx1, stateboxy1, stateboxx2, stateboxy2)
+            print(f"\nState: {state}, Level: {level}, Alliance: {alliance}, Power: {power}")
+
+        pyautogui.click(refreshx, refreshy) # Click on refresh
+
+
 
 
 
