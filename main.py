@@ -132,6 +132,11 @@ stateboxy1 = int(config["screen_values"]["stateboxy1"])
 stateboxx2 = int(config["screen_values"]["stateboxx2"])
 stateboxy2 = int(config["screen_values"]["stateboxy2"])
 
+scrollx1 = int(config["screen_values"]["scrollx1"])
+scrolly1 = int(config["screen_values"]["scrolly1"])
+scrollx2 = int(config["screen_values"]["scrollx2"])
+scrollx2 = int(config["screen_values"]["scrolly2"])
+
 world_chat_x = int(config["screen_values"]["firstchatx"])
 world_chat_y = int(config["screen_values"]["firstchaty"])
 
