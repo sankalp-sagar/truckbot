@@ -60,27 +60,8 @@ def parse_player_info(ocr_result):
 
     return state, level, alliance, power
 
-def find_refresh_icon(frame, template_path="templates/refresh.png", threshold=0.8):
-    template = cv2.imread(template_path)
-    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    template_gray = cv2.cvtColor(template, cv2.COLOR_BGR2GRAY)
-    result = cv2.matchTemplate(frame_gray, template_gray, cv2.TM_CCOEFF_NORMED)
-    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
-    if max_val >= threshold:
-        h, w = template_gray.shape
-        center_x = max_loc[0] + w // 2
-        center_y = max_loc[1] + h // 2
-        return (center_x, center_y)
-    return None
-
-def crop_loot_panel(frame):
-    frame = cv2.imread(frame)
-    h, w, _ = frame.shape
-    x1 = int(w * 0.39)
-    x2 = int(w * 0.61)
-
-    y1 = int(h * 0.64)
-    y2 = int(h * 0.86)
+def crop_loot_panel(frame, x1,y1,x2,y2):
+    frame = cv2.imread(frame, cv2.IMREAD_COLOR)
     panel = frame[y1:y2, x1:x2]
     cv2.imwrite("panel.png", panel)
     return panel
@@ -130,12 +111,7 @@ def count_fragments(
         "mods": mod_count
     }
 
-def crop_state_region(panel):
-    h, w, _ = panel.shape
-    x1 = int(w * 0.23)
-    x2 = int(w * 0.8)
-    y1 = int(h * 0.02)
-    y2 = int(h * 0.25)
+def crop_state_region(panel, x1, y1, x2, y2):
     state_region = panel[y1:y2, x1:x2] 
     cv2.imwrite("stateregion.png", state_region)
     result = ocr.ocr(state_region)
@@ -146,6 +122,40 @@ x1 = int(config["screen_values"]["x1"])
 y1 = int(config["screen_values"]["y1"])
 x2 = int(config["screen_values"]["x2"])
 y2 = int(config["screen_values"]["y2"])
+truckinfotopx1 = int(config["screen_values"]["truckinfotopx1"])
+truckinfotopy1 = int(config["screen_values"]["truckinfotopy1"])
+truckinfobottomx2 = int(config["screen_values"]["truckinfobottomx2"])
+truckinfobottomy2 = int(config["screen_values"]["truckinfobottomy2"])
+
+stateboxx1 = int(config["screen_values"]["stateboxx1"])
+stateboxy1 = int(config["screen_values"]["stateboxy1"])
+stateboxx2 = int(config["screen_values"]["stateboxx2"])
+stateboxy2 = int(config["screen_values"]["stateboxy2"])
+
+world_chat_x = int(config["screen_values"]["firstchatx"])
+world_chat_y = int(config["screen_values"]["firstchaty"])
+
+secondchatx = int(config["screen_values"]["secondchatx"])
+secondchaty = int(config["screen_values"]["secondchaty"])
+thirdchatx = int(config["screen_values"]["thirdchatx"])
+thirdchaty = int(config["screen_values"]["thirdchaty"])
+fourthchatx = int(config["screen_values"]["fourthchatx"])
+fourthchaty = int(config["screen_values"]["fourthchaty"])
+fifthchatx = int(config["screen_values"]["fifthchatx"])
+fifthchaty = int(config["screen_values"]["fifthchaty"])
+sixthchatx = int(config["screen_values"]["sixthchatx"])
+sixthchaty = int(config["screen_values"]["sixthchaty"])
+
+# panel = crop_loot_panel("screenbox.png", truckinfotopx1, truckinfotopy1, truckinfobottomx2, truckinfobottomy2)
+# state, level, alliance, power = crop_state_region("screenbox.png", stateboxx1, stateboxy1, stateboxx2, stateboxy2)
+# print(f"\nState: {state}, Level: {level}, Alliance: {alliance}, Power: {power}")
+
+# if __name__ == "__main__":
+#     time.sleep(5)
+#     state_filter = 0
+#     state_filter = int(input("Enter the state ID to filter (0 for no filter): "))
+
+
 
 
 

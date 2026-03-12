@@ -85,5 +85,5 @@ def map_coordinates(image_path="screenbox.png"):
     return rectangles
 
 
-areas = map_coordinates("sharebutton.png")
+areas = map_coordinates("screenbox.png")
 print("Final areas:", areas)
