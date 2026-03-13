@@ -22,17 +22,19 @@ def capture_screen():
     screenshot = pyautogui.screenshot()
     frame = np.array(screenshot)
     frame = cv2.cvtColor(frame, cv2.COLOR_RGB2BGR)
+    cv2.imwrite("screen.png", frame)
     return frame
 
 def detect_trucks(img):
-    results = model(img, save=False, conf=0.4)
+    results = model(img, save=False, conf=0.7)
     centers = []
+    offset = -20 
     for r in results:
         boxes = r.boxes.xyxy.cpu().numpy()
         for box in boxes:
             x1, y1, x2, y2 = box
             cx = int((x1 + x2) / 2)
-            cy = int((y1 + y2) / 2)
+            cy = int((y1 + y2) / 2) + offset
             centers.append((cx, cy))
     return centers
 
@@ -162,6 +164,7 @@ if __name__ == "__main__":
     state_filter = 0
     #state_filter = int(input("Enter the state ID to filter (0 for no filter): "))
     while True:
+        time.sleep(1)
         screen = capture_screen()
         trucks = detect_trucks(screen)
         for truck in trucks:
