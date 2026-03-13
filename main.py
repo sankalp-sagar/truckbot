@@ -197,6 +197,7 @@ if __name__ == "__main__":
                         "[+] Press 3 for group greedy mode.\n" \
                         "[+] Press 4 for second chat mod box mode.\n"
                         "[+] Press 5 for send to myself mode\n"
+                        "[+] Press 6 for custom points search mode\n"
                         "Input: "))
     state_filter = int(input("Enter the state ID to filter (0 for no filter): "))
 
@@ -215,11 +216,14 @@ if __name__ == "__main__":
     elif run_mode == 5:
         self_run = True
         min_point = 3
+    elif run_mode == 6:
+        custom_group_run = True
+        min_point = 3
 
-    if run_mode == 0:
+    if run_mode == 0 or run_mode == 6:
         min_point = int(input("Enter the minimum number of points to be sent: "))
 
-    detect_mod_boxes = int(input("Do you want to detect mod boxes? Might be slower.\nPress 0 for no and 1 for yes: "))
+    detect_mod_boxes = int(input("Do you want to scroll as well? Might be slower.\nPress 0 for no and 1 for yes: "))
     time.sleep(5)
 
     while True:
@@ -288,6 +292,9 @@ if __name__ == "__main__":
             elif self_run:
                 if points >= 3:
                     send_to_second_chat()
+            elif custom_group_run:
+                if points >= min_point:
+                    send_to_group_chat()
             else:
                 # Normal mode
                 if state_filter == 0:
