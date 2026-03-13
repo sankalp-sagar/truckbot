@@ -18,6 +18,42 @@ ocr = PaddleOCR(lang="en")
 config = configparser.ConfigParser()
 config.read("config.ini")
 
+x1 = int(config["screen_values"]["x1"])
+y1 = int(config["screen_values"]["y1"])
+x2 = int(config["screen_values"]["x2"])
+y2 = int(config["screen_values"]["y2"])
+truckinfotopx1 = int(config["screen_values"]["truckinfotopx1"])
+truckinfotopy1 = int(config["screen_values"]["truckinfotopy1"])
+truckinfobottomx2 = int(config["screen_values"]["truckinfobottomx2"])
+truckinfobottomy2 = int(config["screen_values"]["truckinfobottomy2"])
+
+stateboxx1 = int(config["screen_values"]["stateboxx1"])
+stateboxy1 = int(config["screen_values"]["stateboxy1"])
+stateboxx2 = int(config["screen_values"]["stateboxx2"])
+stateboxy2 = int(config["screen_values"]["stateboxy2"])
+
+scrollx1 = int(config["screen_values"]["scrollx1"])
+scrolly1 = int(config["screen_values"]["scrolly1"])
+scrollx2 = int(config["screen_values"]["scrollx2"])
+scrolly2 = int(config["screen_values"]["scrolly2"])
+
+refreshx = int(config["screen_values"]["refreshx"])
+refreshy = int(config["screen_values"]["refreshy"])
+
+world_chat_x = int(config["screen_values"]["firstchatx"])
+world_chat_y = int(config["screen_values"]["firstchaty"])
+
+secondchatx = int(config["screen_values"]["secondchatx"])
+secondchaty = int(config["screen_values"]["secondchaty"])
+thirdchatx = int(config["screen_values"]["thirdchatx"])
+thirdchaty = int(config["screen_values"]["thirdchaty"])
+fourthchatx = int(config["screen_values"]["fourthchatx"])
+fourthchaty = int(config["screen_values"]["fourthchaty"])
+fifthchatx = int(config["screen_values"]["fifthchatx"])
+fifthchaty = int(config["screen_values"]["fifthchaty"])
+sixthchatx = int(config["screen_values"]["sixthchatx"])
+sixthchaty = int(config["screen_values"]["sixthchaty"])
+
 def capture_screen():
     screenshot = pyautogui.screenshot()
     frame = np.array(screenshot)
@@ -59,6 +95,9 @@ def parse_player_info(ocr_result):
             m = re.search(r"(\d{1,3}(?:,\d{3})+)", text)
             if m and power is None:
                 power = int(m.group(1).replace(",", ""))
+
+    if state is None:
+        state = 0
 
     return state, level, alliance, power
 
@@ -119,62 +158,148 @@ def crop_state_region(panel, x1, y1, x2, y2):
     state, level, alliance, power = parse_player_info(result)
     return state, level, alliance, power
 
-x1 = int(config["screen_values"]["x1"])
-y1 = int(config["screen_values"]["y1"])
-x2 = int(config["screen_values"]["x2"])
-y2 = int(config["screen_values"]["y2"])
-truckinfotopx1 = int(config["screen_values"]["truckinfotopx1"])
-truckinfotopy1 = int(config["screen_values"]["truckinfotopy1"])
-truckinfobottomx2 = int(config["screen_values"]["truckinfobottomx2"])
-truckinfobottomy2 = int(config["screen_values"]["truckinfobottomy2"])
+def send_to_world_chat():
+    pyautogui.click(int(config["screen_values"]["sharebuttonx"]), int(config["screen_values"]["sharebuttony"]))
+    time.sleep(0.5)
+    pyautogui.click(world_chat_x, world_chat_y)
+    time.sleep(0.5)
+    pyautogui.click(int(config["screen_values"]["sharebuttonfinalx"]), int(config["screen_values"]["sharebuttonfinaly"]))
+    time.sleep(1)
 
-stateboxx1 = int(config["screen_values"]["stateboxx1"])
-stateboxy1 = int(config["screen_values"]["stateboxy1"])
-stateboxx2 = int(config["screen_values"]["stateboxx2"])
-stateboxy2 = int(config["screen_values"]["stateboxy2"])
+def send_to_group_chat():
+    pyautogui.click(int(config["screen_values"]["sharebuttonx"]), int(config["screen_values"]["sharebuttony"]))
+    time.sleep(0.5)
+    pyautogui.click(fourthchatx, fourthchaty)
+    time.sleep(0.5)
+    pyautogui.click(int(config["screen_values"]["sharebuttonfinalx"]), int(config["screen_values"]["sharebuttonfinaly"]))
+    time.sleep(1)
 
-scrollx1 = int(config["screen_values"]["scrollx1"])
-scrolly1 = int(config["screen_values"]["scrolly1"])
-scrollx2 = int(config["screen_values"]["scrollx2"])
-scrollx2 = int(config["screen_values"]["scrolly2"])
-
-refreshx = int(config["screen_values"]["refreshx"])
-refreshy = int(config["screen_values"]["refreshy"])
-
-world_chat_x = int(config["screen_values"]["firstchatx"])
-world_chat_y = int(config["screen_values"]["firstchaty"])
-
-secondchatx = int(config["screen_values"]["secondchatx"])
-secondchaty = int(config["screen_values"]["secondchaty"])
-thirdchatx = int(config["screen_values"]["thirdchatx"])
-thirdchaty = int(config["screen_values"]["thirdchaty"])
-fourthchatx = int(config["screen_values"]["fourthchatx"])
-fourthchaty = int(config["screen_values"]["fourthchaty"])
-fifthchatx = int(config["screen_values"]["fifthchatx"])
-fifthchaty = int(config["screen_values"]["fifthchaty"])
-sixthchatx = int(config["screen_values"]["sixthchatx"])
-sixthchaty = int(config["screen_values"]["sixthchaty"])
-
-# panel = crop_loot_panel("screenbox.png", truckinfotopx1, truckinfotopy1, truckinfobottomx2, truckinfobottomy2)
-# state, level, alliance, power = crop_state_region("screenbox.png", stateboxx1, stateboxy1, stateboxx2, stateboxy2)
-# print(f"\nState: {state}, Level: {level}, Alliance: {alliance}, Power: {power}")
+def send_to_second_chat():
+    pyautogui.click(int(config["screen_values"]["sharebuttonx"]), int(config["screen_values"]["sharebuttony"]))
+    time.sleep(0.5)
+    pyautogui.click(fifthchatx, fifthchaty)
+    time.sleep(0.5)
+    pyautogui.click(int(config["screen_values"]["sharebuttonfinalx"]), int(config["screen_values"]["sharebuttonfinaly"]))
+    time.sleep(1)
 
 if __name__ == "__main__":
-    time.sleep(5)
     state_filter = 0
-    #state_filter = int(input("Enter the state ID to filter (0 for no filter): "))
+    greedy_run = False
+    group_run = False
+    group_greedy_run = False
+    second_mod_box_mode = False
+    self_run = False
+    mod_boxes = 0
+    total_trucks_detected = 0
+    run_mode = int(input("[+] Press 0 for normal mode.\n" \
+                        "[+] Press 1 for greedy mode.\n" \
+                        "[+] Press 2 for group run mode.\n" \
+                        "[+] Press 3 for group greedy mode.\n" \
+                        "[+] Press 4 for second chat mod box mode.\n"
+                        "[+] Press 5 for send to myself mode\n"
+                        "Input: "))
+    state_filter = int(input("Enter the state ID to filter (0 for no filter): "))
+
+    if run_mode == 1:
+        greedy_run = True
+        min_point = 2
+    elif run_mode == 2:
+        group_run = True
+        min_point = 2
+    elif run_mode == 3:
+        group_greedy_run = True
+        min_point = 3
+    elif run_mode == 4:
+        second_mod_box_mode = True
+        min_point = 3
+    elif run_mode == 5:
+        self_run = True
+        min_point = 3
+
+    if run_mode == 0:
+        min_point = int(input("Enter the minimum number of points to be sent: "))
+
+    detect_mod_boxes = int(input("Do you want to detect mod boxes? Might be slower.\nPress 0 for no and 1 for yes: "))
+    time.sleep(5)
+
     while True:
         time.sleep(1)
         screen = capture_screen()
         trucks = detect_trucks(screen)
         for truck in trucks:
             pyautogui.click(truck[0], truck[1]) # Click on truck
-            time.sleep(0.5)
+            time.sleep(1)
             points = 0
             screen = capture_screen()
             info_box = crop_loot_panel(screen, truckinfotopx1, truckinfotopy1, truckinfobottomx2, truckinfobottomy2)
             state, level, alliance, power = crop_state_region(screen, stateboxx1, stateboxy1, stateboxx2, stateboxy2)
             print(f"\nState: {state}, Level: {level}, Alliance: {alliance}, Power: {power}")
+            if run_mode == 0:
+                if state_filter != 0 and state != state_filter:
+                    print(f"[-] Skipping truck with state ID {state}")
+                    if state != 0:
+                        continue
+            result = count_fragments()
+            fragments = int(result["fragments"])
+            mods = int(result["mods"])
+
+            points += (fragments+mods)
+            print(f"Detected {fragments} fragments, {mods} mods")
+            if detect_mod_boxes and (second_mod_box_mode or points < min_point):
+                scroll(scrollx2, scrolly2, scrollx1, scrolly1)
+                time.sleep(0.5)
+                screen = capture_screen()
+                result = count_fragments()
+                fragments = int(result["fragments"])
+                mods = int(result["mods"])
+                points += (fragments+mods)
+                print(f"Detected {mods} mod boxes")
+                scroll(scrollx1, scrolly1, scrollx2, scrolly2)
+                time.sleep(0.5)
+            total_trucks_detected += 1
+            print(f"[+] Total trucks detected so far: {total_trucks_detected}")
+
+            if greedy_run:
+                if state_filter == 0:
+                    # No state filter
+                    if points == 2:
+                        send_to_world_chat()
+                    elif points > 2:
+                        send_to_group_chat()
+                else:
+                    # State filter is ON
+                    if points > 2:
+                        send_to_group_chat()
+                    elif state == state_filter and points == 2:
+                        send_to_world_chat()
+                    elif state == 0 and points > 1:
+                        send_to_second_chat()
+            elif group_run:
+                # Group run ON
+                if points > 1:
+                    send_to_group_chat()
+            elif group_greedy_run:
+                if points >= min_point:
+                    #send_to_group_chat()
+                    send_to_group_chat()
+            elif second_mod_box_mode:
+                if mod_boxes >= 3:
+                    send_to_second_chat()
+            elif self_run:
+                if points >= 3:
+                    send_to_second_chat()
+            else:
+                # Normal mode
+                if state_filter == 0:
+                    if points >= min_point:
+                        send_to_world_chat()
+                else:
+                    if state == state_filter and points >= min_point:
+                        send_to_world_chat()
+                    elif state == 0 and points >= min_point:
+                        send_to_second_chat()
+
+
 
         pyautogui.click(refreshx, refreshy) # Click on refresh
 
