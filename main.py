@@ -160,25 +160,25 @@ def crop_state_region(panel, x1, y1, x2, y2):
 
 def send_to_world_chat():
     pyautogui.click(int(config["screen_values"]["sharebuttonx"]), int(config["screen_values"]["sharebuttony"]))
-    time.sleep(0.5)
+    time.sleep(1)
     pyautogui.click(world_chat_x, world_chat_y)
-    time.sleep(0.5)
+    time.sleep(1)
     pyautogui.click(int(config["screen_values"]["sharebuttonfinalx"]), int(config["screen_values"]["sharebuttonfinaly"]))
     time.sleep(1)
 
 def send_to_group_chat():
     pyautogui.click(int(config["screen_values"]["sharebuttonx"]), int(config["screen_values"]["sharebuttony"]))
-    time.sleep(0.5)
+    time.sleep(1)
     pyautogui.click(fourthchatx, fourthchaty)
-    time.sleep(0.5)
+    time.sleep(1)
     pyautogui.click(int(config["screen_values"]["sharebuttonfinalx"]), int(config["screen_values"]["sharebuttonfinaly"]))
     time.sleep(1)
 
 def send_to_second_chat():
     pyautogui.click(int(config["screen_values"]["sharebuttonx"]), int(config["screen_values"]["sharebuttony"]))
-    time.sleep(0.5)
+    time.sleep(1)
     pyautogui.click(fifthchatx, fifthchaty)
-    time.sleep(0.5)
+    time.sleep(1)
     pyautogui.click(int(config["screen_values"]["sharebuttonfinalx"]), int(config["screen_values"]["sharebuttonfinaly"]))
     time.sleep(1)
 
@@ -189,6 +189,7 @@ if __name__ == "__main__":
     group_greedy_run = False
     second_mod_box_mode = False
     self_run = False
+    custom_group_run = False
     mod_boxes = 0
     total_trucks_detected = 0
     run_mode = int(input("[+] Press 0 for normal mode.\n" \
@@ -251,15 +252,16 @@ if __name__ == "__main__":
             print(f"Detected {fragments} fragments, {mods} mods")
             if detect_mod_boxes and (second_mod_box_mode or points < min_point):
                 scroll(scrollx2, scrolly2, scrollx1, scrolly1)
-                time.sleep(0.5)
+                time.sleep(1)
                 screen = capture_screen()
+                info_box = crop_loot_panel(screen, truckinfotopx1, truckinfotopy1, truckinfobottomx2, truckinfobottomy2)
                 result = count_fragments()
                 fragments = int(result["fragments"])
                 mods = int(result["mods"])
                 points += (fragments+mods)
                 print(f"Detected {mods} mod boxes")
                 scroll(scrollx1, scrolly1, scrollx2, scrolly2)
-                time.sleep(0.5)
+                time.sleep(1)
             total_trucks_detected += 1
             print(f"[+] Total trucks detected so far: {total_trucks_detected}")
 
