@@ -332,7 +332,7 @@ if __name__ == "__main__":
                     if reward == 'mod':
                         mods += 1
 
-            points += (fragments+mods)
+            points = fragments + mods
             print(f"Detected {fragments} fragments, {mods} mods")
             if detect_mod_boxes and (second_mod_box_mode or points < min_point):
                 scroll(scrollx2, scrolly2, scrollx1, scrolly1)
@@ -348,7 +348,7 @@ if __name__ == "__main__":
                     if reward == 'mod':
                         mods += 1
 
-                points += (fragments+mods)
+                points = fragments + mods
                 print(f"Detected {mods} mod boxes")
                 scroll(scrollx1, scrolly1, scrollx2, scrolly2)
                 time.sleep(1)
