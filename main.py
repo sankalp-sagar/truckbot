@@ -336,7 +336,7 @@ if __name__ == "__main__":
             print(f"Detected {fragments} fragments, {mods} mods")
             if detect_mod_boxes and (second_mod_box_mode or points < min_point):
                 scroll(scrollx2, scrolly2, scrollx1, scrolly1)
-                time.sleep(1)
+                time.sleep(0.5)
                 screen = capture_screen()
                 info_box = crop_loot_panel(screen, truckinfotopx1, truckinfotopy1, truckinfobottomx2, truckinfobottomy2)
                 result = count_fragments()
@@ -349,9 +349,9 @@ if __name__ == "__main__":
                         mods += 1
 
                 points = fragments + mods
-                print(f"Detected {mods} mod boxes")
+                print(f"Final after scrolling. Detected {mods} mod boxes and {fragments} fragments")
                 scroll(scrollx1, scrolly1, scrollx2, scrolly2)
-                time.sleep(1)
+                time.sleep(0.5)
             total_trucks_detected += 1
             print(f"[+] Total trucks detected so far: {total_trucks_detected}")
 
