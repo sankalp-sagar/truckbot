@@ -54,6 +54,12 @@ fifthchaty = int(config["screen_values"]["fifthchaty"])
 sixthchatx = int(config["screen_values"]["sixthchatx"])
 sixthchaty = int(config["screen_values"]["sixthchaty"])
 
+firstitemx = int(config["screen_values"]["firstitemx"])
+firstitemy = int(config["screen_values"]["firstitemy"])
+
+fifthitemx = int(config["screen_values"]["fifthitemx"])
+fifthitemy = int(config["screen_values"]["fifthitemy"])
+
 def capture_screen():
     screenshot = pyautogui.screenshot()
     frame = np.array(screenshot)
@@ -108,6 +114,12 @@ def parse_player_info(ocr_result):
 
     if state is None:
         state = 0
+    if level is None:
+        level = 0
+    if alliance is None:
+        alliance = ""
+    if power is None:
+        power = 0
 
     return state, level, alliance, power
 
@@ -146,20 +158,58 @@ def scroll(x1, y1, x2, y2, duration=0.2):
     pyautogui.mouseUp()
 
 def count_fragments(
-        info_box_path="panel.png",
+        info_box_path="screen.png",
         fragment_template="templates/fragment.png",
         mod_template="templates/mod_box.png",
         threshold=0.8
     ):
     img = cv2.imread(info_box_path, cv2.IMREAD_COLOR)
 
-    fragment_count = detect_template(img, fragment_template, threshold)
-    mod_count = detect_template(img, mod_template, threshold)
+    fragment_boxes = detect_template_boxes(img, fragment_template, threshold)
+    mod_boxes = detect_template_boxes(img, mod_template, threshold)
 
-    return {
-        "fragments": fragment_count,
-        "mods": mod_count
-    }
+    items = []
+
+    for box in fragment_boxes:
+        items.append({
+            "reward": "fragment",
+            "area": box
+        })
+
+    for box in mod_boxes:
+        items.append({
+            "reward": "mod",
+            "area": box
+        })
+
+    return items
+
+def detect_template_boxes(img, template_path, threshold=0.8):
+    template = cv2.imread(template_path, cv2.IMREAD_COLOR)
+    h, w = template.shape[:2]
+
+    res = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED)
+    loc = np.where(res >= threshold)
+
+    raw_boxes = []
+    for pt in zip(*loc[::-1]):
+        x, y = pt
+        raw_boxes.append((x, y, x + w, y + h))
+
+    raw_boxes = sorted(raw_boxes, key=lambda b: b[0])
+
+    filtered = []
+    for box in raw_boxes:
+        x1, y1, x2, y2 = box
+
+        if not any(abs(x1 - fx1) < w * 0.8 for (fx1, _, _, _) in filtered):
+            filtered.append(box)
+
+    return filtered
+
+def is_point_inside_box(x, y, box):
+    x1, y1, x2, y2 = box
+    return x1 <= x <= x2 and y1 <= y <= y2
 
 def crop_state_region(panel, x1, y1, x2, y2):
     state_region = panel[y1:y2, x1:x2] 
@@ -242,7 +292,8 @@ if __name__ == "__main__":
         screen = capture_screen()
         trucks = detect_trucks(screen)
         for truck in trucks:
-            truck_type = truck['type']
+            truck_type = str(truck['type'])
+            print(f"Current truck: {truck_type}")
             pyautogui.click(truck['center'][0], truck['center'][1]) # Click on truck
             time.sleep(1)
             points = 0
@@ -255,9 +306,31 @@ if __name__ == "__main__":
                     print(f"[-] Skipping truck with state ID {state}")
                     if state != 0:
                         continue
+                    
             result = count_fragments()
-            fragments = int(result["fragments"])
-            mods = int(result["mods"])
+            fragments = 0
+            mods = 0
+            fifthreward = ""
+            for item in result:
+                reward = str(item['reward'])
+                box = item['area']
+                if truck_type == 'purple_truck':
+                    print(f"Found the purple truck {truck_type}")
+                    if detect_mod_boxes and is_point_inside_box(fifthitemx, fifthitemy, box):
+                        fifthreward = reward
+                        print(f"Oh look! the fifth reward: {reward}")
+                    else:
+                        print(f"Nope it is not the fifth reward: {reward}")
+                        if reward == 'fragment':
+                            fragments += 1
+                        if reward == 'mod':
+                            mods += 1
+                else:
+                    print(f"Ohh i didn't find the purple truck {truck_type}")
+                    if reward == 'fragment':
+                        fragments += 1
+                    if reward == 'mod':
+                        mods += 1
 
             points += (fragments+mods)
             print(f"Detected {fragments} fragments, {mods} mods")
@@ -267,8 +340,14 @@ if __name__ == "__main__":
                 screen = capture_screen()
                 info_box = crop_loot_panel(screen, truckinfotopx1, truckinfotopy1, truckinfobottomx2, truckinfobottomy2)
                 result = count_fragments()
-                fragments = int(result["fragments"])
-                mods = int(result["mods"])
+                for item in result:
+                    reward = str(item['reward'])
+                    box = item['area']
+                    if reward == 'fragment':
+                        fragments += 1
+                    if reward == 'mod':
+                        mods += 1
+
                 points += (fragments+mods)
                 print(f"Detected {mods} mod boxes")
                 scroll(scrollx1, scrolly1, scrollx2, scrolly2)
