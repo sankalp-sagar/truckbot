@@ -63,16 +63,26 @@ def capture_screen():
 
 def detect_trucks(img):
     results = model(img, save=False, conf=0.7)
-    centers = []
+    trucks = []
     offset = -20 
+
     for r in results:
         boxes = r.boxes.xyxy.cpu().numpy()
-        for box in boxes:
+        class_ids = r.boxes.cls.cpu().numpy()
+
+        for box, cls_id in zip(boxes, class_ids):
             x1, y1, x2, y2 = box
             cx = int((x1 + x2) / 2)
             cy = int((y1 + y2) / 2) + offset
-            centers.append((cx, cy))
-    return centers
+
+            class_name = classes[int(cls_id)]  # <-- key line
+
+            trucks.append({
+                "center": (cx, cy),
+                "type": class_name
+            })
+
+    return trucks
 
 def parse_player_info(ocr_result):
     state = None
@@ -232,7 +242,8 @@ if __name__ == "__main__":
         screen = capture_screen()
         trucks = detect_trucks(screen)
         for truck in trucks:
-            pyautogui.click(truck[0], truck[1]) # Click on truck
+            truck_type = truck['type']
+            pyautogui.click(truck['center'][0], truck['center'][1]) # Click on truck
             time.sleep(1)
             points = 0
             screen = capture_screen()
@@ -311,41 +322,3 @@ if __name__ == "__main__":
 
 
         pyautogui.click(refreshx, refreshy) # Click on refresh
-
-
-
-
-
-
-
-# time.sleep(5)
-# frame = capture_screen()
-# refresh_coords = find_refresh_icon(frame)
-# trucks = detect_trucks(frame)
-
-# for truck in trucks:
-#     pyautogui.click(truck[0], truck[1])
-
-# tests_folder = "tests"
-# for test_file in Path(tests_folder).glob("*"):
-#     if test_file.is_file():
-#         frame = crop_loot_panel(str(test_file))
-#         state, level, alliance, power = crop_state_region(frame)
-#         print(f"\n{test_file.name} - State: {state}, Level: {level}, Alliance: {alliance}, Power: {power}")
-
-# frame = crop_loot_panel("screenbox.png")
-# state, level, alliance, power = crop_state_region(frame)
-# print("State: ", state)
-# print("Level: ", level)
-# print("Alliance: ", alliance)
-# print("Power: ", power)
-
-# cv2.imshow("frane", state)
-# cv2.waitKey(0)
-
-# tests_filder = "tests"
-# for test_file in Path(tests_filder).glob("*"):
-#     if test_file.is_file():
-#         frame = crop_loot_panel(str(test_file))
-#         fragments = count_fragments()
-#         print("Fragment is: ", fragments)
